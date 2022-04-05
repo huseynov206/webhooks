@@ -1,0 +1,60 @@
+require:
+  - rubocop-performance
+  - rubocop-rake
+  - rubocop-rspec
+  - rubocop-rails
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 2.7
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: '[]'
+
+Style/DoubleNegation:
+  Enabled: no
+
+Style/Documentation:
+  Enabled: yes
+  Exclude:
+    - 'db/**/*.rb'
+    - 'config/**/*.rb'
+    - 'spec/**/*.rb'
+
+Metrics/AbcSize:
+  Enabled: yes
+
+Metrics/MethodLength:
+  Enabled: yes
+
+Metrics/CyclomaticComplexity:
+  Enabled: yes
+
+Metrics/PerceivedComplexity:
+  Enabled: yes
+
+Metrics/ClassLength:
+  Enabled: yes
+
+Naming/AccessorMethodName:
+  Enabled: yes
+
+Layout/LineLength:
+  Max: 120
+
+RSpec/MultipleExpectations:
+  Max: 3
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*.rb'
+
+RSpec/NestedGroups:
+  Max: 5
+
+RSpec/ExampleLength:
+  Max: 10
+
+RSpec/LetSetup:
+  Enabled: no
