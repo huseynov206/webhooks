@@ -10,12 +10,12 @@ class TasksController < ApplicationController
   end
 
   def create
-    @task = @project.tasks.build(task_params)
+    result = TaskService::Creator.call(@project, task_params)
 
-    if @task.save
-      render json: TaskSerializer.new(@task).serializable_hash
+    if result.success?
+      render json: TaskSerializer.new(result.task).serializable_hash
     else
-      render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: result.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -24,26 +24,28 @@ class TasksController < ApplicationController
   end
 
   def update
-    if @task.update(task_params)
-      render json: TaskSerializer.new(@task).serializable_hash
+    result = TaskService::Updater.call(@task, task_params)
+
+    if result.success?
+      render json: TaskSerializer.new(result.task).serializable_hash
     else
-      render json: { errors: @task.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: result.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @task.destroy
+    TaskService::Destroyer.call(@task)
     head :ok
   end
 
   private
 
   def find_project
-    @project = Project.find(params[:project_id])
+    @project = ProjectService::Finder.call(nil, params[:project_id])
   end
 
   def find_task
-    @task = @project.tasks.find(params[:id])
+    @task = TaskService::Finder.call(@project, params[:id])
   end
 
   def task_params

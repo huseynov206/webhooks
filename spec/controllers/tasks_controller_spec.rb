@@ -3,11 +3,14 @@
 require 'rails_helper'
 
 RSpec.describe TasksController, type: :controller do
+  include JsonToken
+
+  let!(:user) { create(:user) }
+  let!(:token) { jwt_encode({ user_id: user.id }) }
+
   describe 'GET #index' do
     let!(:project1) { create(:project) }
-    let!(:project2) { create(:project) }
     let!(:task1) { create(:task, project: project1) }
-    let!(:task2) { create(:task, project: project2) }
     let(:expected_response) do
       {
         data: [{
@@ -25,6 +28,7 @@ RSpec.describe TasksController, type: :controller do
     end
 
     it 'returns all tasks for project' do
+      request.headers['Authorization'] = "Bearer #{token}"
       get :index, params: { project_id: project1.id }
 
       expect(response).to be_ok
@@ -57,6 +61,7 @@ RSpec.describe TasksController, type: :controller do
       end
 
       it 'returns task json' do
+        request.headers['Authorization'] = "Bearer #{token}"
         freeze_time do
           post :create, params: params
 
@@ -68,6 +73,7 @@ RSpec.describe TasksController, type: :controller do
 
     context 'when error occurred' do
       it 'returns errors' do
+        request.headers['Authorization'] = "Bearer #{token}"
         post :create, params: { project_id: project.id }
 
         expect(response.status).to eq(422)
@@ -98,6 +104,7 @@ RSpec.describe TasksController, type: :controller do
       end
 
       it 'when returns task json' do
+        request.headers['Authorization'] = "Bearer #{token}"
         get :show, params: { project_id: task.project_id, id: task.id }
 
         expect(response).to be_ok
@@ -109,6 +116,7 @@ RSpec.describe TasksController, type: :controller do
       let!(:project) { create(:project) }
 
       it 'returns 404' do
+        request.headers['Authorization'] = "Bearer #{token}"
         get :show, params: { project_id: project.id, id: 1 }
 
         expect(response).to be_not_found
@@ -119,10 +127,9 @@ RSpec.describe TasksController, type: :controller do
     context 'when task does not exist for project' do
       let!(:project1) { create(:project) }
       let!(:project2) { create(:project) }
-      let!(:task1) { create(:task, project: project1) }
-      let!(:task2) { create(:task, project: project2) }
 
       it 'returns 404' do
+        request.headers['Authorization'] = "Bearer #{token}"
         get :show, params: { project_id: project1.id, id: project2.id }
 
         expect(response).to be_not_found
@@ -160,6 +167,7 @@ RSpec.describe TasksController, type: :controller do
         end
 
         it 'returns task json' do
+          request.headers['Authorization'] = "Bearer #{token}"
           freeze_time do
             patch :update, params: params
 
@@ -179,6 +187,7 @@ RSpec.describe TasksController, type: :controller do
         end
 
         it 'returns errors' do
+          request.headers['Authorization'] = "Bearer #{token}"
           patch :update, params: params
 
           expect(response.status).to eq(422)
@@ -198,6 +207,7 @@ RSpec.describe TasksController, type: :controller do
       end
 
       it 'returns 404' do
+        request.headers['Authorization'] = "Bearer #{token}"
         patch :update, params: params
 
         expect(response).to be_not_found
@@ -208,7 +218,6 @@ RSpec.describe TasksController, type: :controller do
     context 'when task does not exist for organization' do
       let!(:project1) { create(:project) }
       let!(:project2) { create(:project) }
-      let!(:task1) { create(:task, project: project1) }
       let!(:task2) { create(:task, project: project2) }
       let(:params) do
         {
@@ -219,6 +228,7 @@ RSpec.describe TasksController, type: :controller do
       end
 
       it 'returns 404' do
+        request.headers['Authorization'] = "Bearer #{token}"
         patch :update, params: params
 
         expect(response).to be_not_found
@@ -232,6 +242,7 @@ RSpec.describe TasksController, type: :controller do
       let(:task) { create(:task) }
 
       it 'returns 200' do
+        request.headers['Authorization'] = "Bearer #{token}"
         delete :destroy, params: { project_id: task.project_id, id: task.id }
         expect(response).to be_ok
       end
@@ -241,6 +252,7 @@ RSpec.describe TasksController, type: :controller do
       let!(:project) { create(:project) }
 
       it 'returns 404' do
+        request.headers['Authorization'] = "Bearer #{token}"
         delete :destroy, params: { project_id: project.id, id: 1 }
 
         expect(response).to be_not_found
@@ -251,10 +263,10 @@ RSpec.describe TasksController, type: :controller do
     context 'when task does not exist for project' do
       let!(:project1) { create(:project) }
       let!(:project2) { create(:project) }
-      let!(:task1) { create(:task, project: project1) }
       let!(:task2) { create(:task, project: project2) }
 
       it 'returns 404' do
+        request.headers['Authorization'] = "Bearer #{token}"
         delete :destroy, params: { project_id: project1.id, id: task2.id }
 
         expect(response).to be_not_found

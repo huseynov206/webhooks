@@ -8,4 +8,6 @@ Rails.application.routes.draw do
   resources :projects, only: [] do
     resources :tasks, only: %i[index create show update destroy]
   end
+
+  post '/auth/login', to: 'authentication#login'
 end

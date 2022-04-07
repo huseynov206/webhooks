@@ -3,6 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe OrganizationsController, type: :controller do
+  include JsonToken
+  let!(:user) { create(:user) }
+  let!(:token) { jwt_encode({ user_id: user.id }) }
+
   describe 'GET #show' do
     context 'when organization exists' do
       let!(:organization) { create(:organization) }
@@ -20,6 +24,7 @@ RSpec.describe OrganizationsController, type: :controller do
       end
 
       it 'returns organization json' do
+        request.headers['Authorization'] = "Bearer #{token}"
         get :show, params: { id: organization.id }
 
         expect(response).to be_ok
@@ -29,6 +34,7 @@ RSpec.describe OrganizationsController, type: :controller do
 
     context 'when organization does not exist' do
       it 'returns 404' do
+        request.headers['Authorization'] = "Bearer #{token}"
         get :show, params: { id: 1 }
 
         expect(response).to be_not_found
