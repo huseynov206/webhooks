@@ -10,12 +10,12 @@ class ProjectsController < ApplicationController
   end
 
   def create
-    @project = @organization.projects.build(project_params)
+    result = ProjectService::Creator.call(@organization, project_params)
 
-    if @project.save
-      render json: ProjectSerializer.new(@project).serializable_hash
+    if result.success?
+      render json: ProjectSerializer.new(result.project).serializable_hash
     else
-      render json: { errors: @project.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: result.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -24,26 +24,28 @@ class ProjectsController < ApplicationController
   end
 
   def update
-    if @project.update(project_params)
-      render json: ProjectSerializer.new(@project).serializable_hash
+    result = ProjectService::Updater.call(@project, project_params)
+
+    if result.success?
+      render json: ProjectSerializer.new(result.project).serializable_hash
     else
-      render json: { errors: @project.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: result.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @project.destroy
+    ProjectService::Destroyer.call(@project)
     head :ok
   end
 
   private
 
   def find_organization
-    @organization = Organization.find(params[:organization_id])
+    @organization = OrganizationFinder.call(params[:organization_id])
   end
 
   def find_project
-    @project = @organization.projects.find(params[:id])
+    @project = ProjectService::Finder.call(@organization, params[:id])
   end
 
   def project_params
